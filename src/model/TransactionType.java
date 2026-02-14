@@ -1,4 +1,7 @@
 package model;
 
-public class TransactionType {
+public enum TransactionType {
+    DEPOSIT,
+    WITHDRAW,
+    TRANSFER
 }
