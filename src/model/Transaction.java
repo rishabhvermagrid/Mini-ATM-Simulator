@@ -6,7 +6,6 @@ public class Transaction {
 
     private final String transactionId;
     private final String myAccount;
-    private final String toAccount;
     private final TransactionType type;
     private final LocalDateTime time;
     private double amount;
@@ -16,7 +15,6 @@ public class Transaction {
     // Constructor for loading from file
     public Transaction(String transactionId,
                        String myAccount,
-                       String toAccount,
                        TransactionType type,
                        LocalDateTime time,
                        double amount,
@@ -24,7 +22,6 @@ public class Transaction {
 
         this.transactionId = transactionId;
         this.myAccount = myAccount;
-        this.toAccount = toAccount;
         this.type = type;
         this.time = time;
         this.amount = amount;
@@ -34,7 +31,6 @@ public class Transaction {
     // getters
     public String getTransactionId() { return transactionId; }
     public String getAccountNumber() { return myAccount; }
-    public String getToAccount(){ return toAccount; }
     public TransactionType getType() { return type; }
     public LocalDateTime getTime() { return time; }
     public double getAmount() { return amount; }
@@ -45,14 +41,14 @@ public class Transaction {
     public String toString() {
         return "Transaction{" +
                 "transactionId='" + transactionId + '\'' +
-                ", accountNumber='" + myAccount + '\'' +
-                (toAccount != null ? ", toAccount='" + toAccount + '\'' : "") +
+                ", Account='" + myAccount + '\'' +
                 ", type=" + type +
                 ", time=" + time +
                 ", amount=" + amount +
                 ", description='" + description + '\'' +
                 '}';
     }
+
 
 
 }

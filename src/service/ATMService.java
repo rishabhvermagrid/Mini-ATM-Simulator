@@ -86,13 +86,11 @@ public class ATMService {
         Transaction transaction = new Transaction(
                 UUID.randomUUID().toString(),          // transactionId
                 account.getAccountNumber(),
-                null,// to account
                 TransactionType.DEPOSIT,               // type
                 LocalDateTime.now(),                   // time
                 amount,
                 "Cash Deposit"
         );
-
         // Save transaction
         transactionRepository.saveTransaction(transaction);
     }
@@ -109,7 +107,6 @@ public class ATMService {
         Transaction transaction = new Transaction(
                 UUID.randomUUID().toString(),          // transactionId
                 account.getAccountNumber(),// accountNumber
-                null,
                 TransactionType.WITHDRAW,               // type
                 LocalDateTime.now(),                   // time
                 amount,
@@ -148,21 +145,19 @@ public class ATMService {
         Transaction senderTransaction = new Transaction(
                 UUID.randomUUID().toString(),          // transactionId
                 sender.getAccountNumber(),
-                receiver.getAccountNumber(),// accountNumber
                 TransactionType.TRANSFER_OUT,               // type
                 LocalDateTime.now(),                   // time
                 amount,
-                "tune kisi ko transer kiya hai"
+                "transferred to account"+receiver.getAccountNumber()
         );
 
         Transaction receiverTransaction = new Transaction(
                 UUID.randomUUID().toString(),          // transactionId
                 receiver.getAccountNumber(),
-                sender.getAccountNumber(),// accountNumber
                 TransactionType.TRANSFER_IN,               // type
                 LocalDateTime.now(),                   // time
                 amount,
-                "is bhai ne itna transfer kiya tujhe"
+                "a/c no. "+sender.getAccountNumber()+" transferred you"
         );
 
 
