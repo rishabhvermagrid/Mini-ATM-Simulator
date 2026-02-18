@@ -1,3 +1,6 @@
 accountNumber,accountHolderName,pin,balance,isLocked,failedAttempts
-1001,Rishabh,1234,6000,false,0
-1002,Ravi,4567,3000,false,0
+1005,kamal,0000,1000.0,false,0
+1004,arbaz,0000,1000.0,false,0
+1003,sanjay,0000,3500.0,false,0
+1002,Ravi,4567,3000.0,false,0
+1001,Rishabh,1234,5500.0,false,0

@@ -1,4 +1,8 @@
 package model;
+import exception.InsufficientBalanceException;
+
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 /*
@@ -15,18 +19,38 @@ public class Account {
     private double balance;
     private boolean isLocked;
     private int failedLoginAttempts;
-    private List<String> transactionHistory;
+
+    @Override
+    public String toString() {
+        return "Account{" +
+                "accountNumber='" + accountNumber + '\'' +
+                ", accountHolderName='" + accountHolderName + '\'' +
+                ", pin='" + pin + '\'' +
+                ", balance=" + balance +
+                ", isLocked=" + isLocked +
+                ", failedLoginAttempts=" + failedLoginAttempts +
+                '}';
+    }
+
+    private List<Transaction> transactionHistory;
 
     //constructors
-    public Account(String accountNumber, String accountHolderName, String pin, double balance, boolean isLocked, int failedLoginAttempts, List<String> list, List<String> transactionHistory) {
+    public Account(String accountNumber, String accountHolderName, String pin, double balance, boolean isLocked, int failedLoginAttempts) {
+        if (balance < 0) {
+            throw new IllegalArgumentException("Initial balance cannot be negative");
+        }
+        if (pin == null || !pin.matches("\\d{4}")) {
+            throw new IllegalArgumentException("PIN must be exactly 4 digits");
+        }
+        //Meaning of \\d{4}:  \\d → digit  Length must be 4
+        //Only digits allowed (0–9)
         this.accountNumber = accountNumber;
         this.accountHolderName = accountHolderName;
         this.pin = pin;
         this.balance = balance;
         this.isLocked = isLocked;
         this.failedLoginAttempts = failedLoginAttempts;
-        this.transactionHistory = transactionHistory;
-
+        this.transactionHistory = new ArrayList<>();
     }
     //getters
     public String getPin() {
@@ -53,30 +77,29 @@ public class Account {
         return failedLoginAttempts;
     }
 
-    public List<String> getTransactionHistory() {
+    public List<Transaction> getTransactionHistory() {
         return transactionHistory;
     }
 
     //methods
-    public void deposit(double amount){
 
-    }
-    public void withdraw(double amount){
-
-    }
     public void lockAccount(){
-
+        this.isLocked = true;
     }
     public void incrementFailedAttempts(){
-
+        this.failedLoginAttempts++;
+        if(this.failedLoginAttempts>=3){
+            this.isLocked=true;
+        }
     }
     public void resetFailedAttempts(){
-
+        this.failedLoginAttempts=0;
     }
     public void addTransaction(Transaction transaction){
-
+        this.transactionHistory.add(transaction);
     }
 
-
-
+    public void setBalance(double v) {
+        this.balance = v;
+    }
 }

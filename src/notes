@@ -1,0 +1,14 @@
+Transaction transaction = new Transaction(
+                LocalDateTime.now(),
+                amount,
+                "Deposit",
+                TransactionType.DEPOSIT
+        );
+        transactionHistory.add(transaction);
+
+transaction history remaining
+_________________________________________
+
+
+
+

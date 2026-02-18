@@ -5,22 +5,43 @@ import exception.AccountNotFoundException;
 import exception.InsufficientBalanceException;
 import exception.InvalidPinException;
 import model.Account;
+import model.Transaction;
+import model.TransactionType;
 import repository.AccountRepository;
-
+import repository.TransactionRepository;
 import java.io.IOException;
+import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 public class ATMService {
     private AccountRepository repository;
     private Map<String, Account> accounts;
+    private TransactionRepository transactionRepository;
 
-    public void CreateAccount(Account account){
-        if(accounts.containsKey(account.getAccountNumber())){
-            throw new RuntimeException("account already exists");
+    public ATMService(AccountRepository repository, TransactionRepository transactionRepository) throws IOException {
+        this.repository = repository;
+        this.accounts = repository.loadAccounts();
+        this.transactionRepository = transactionRepository;
+    }
+
+    public void createAccount(Account account) {
+
+        if (account == null) {
+            throw new IllegalArgumentException("Account cannot be null");
         }
+
+        if (accounts.containsKey(account.getAccountNumber())) {
+            throw new RuntimeException("Account already exists");
+        }
+
         accounts.put(account.getAccountNumber(), account);
+
         repository.saveAccounts(accounts);
     }
+
+
     //authentication
     public Account login(String accountNumber,String pin) throws IOException {
         accounts = repository.loadAccounts();
@@ -51,7 +72,6 @@ public class ATMService {
                 "Invalid PIN. Attempts left: "+(3-account.getFailedLoginAttempts())
         );
     }
-
     public void deposit(Account account,double amount){
         if(account.isLocked()){
             throw new AccountLockedException("Account is Locked");
@@ -59,8 +79,22 @@ public class ATMService {
         if(amount<=0){
             throw new RuntimeException("Deposit amount must be positive");
         }
+        //This updates the same Account object that exists inside your accounts Map.
         account.setBalance(account.getBalance()+amount);
         repository.saveAccounts(accounts);
+        // Create Transaction
+        Transaction transaction = new Transaction(
+                UUID.randomUUID().toString(),          // transactionId
+                account.getAccountNumber(),
+                null,// to account
+                TransactionType.DEPOSIT,               // type
+                LocalDateTime.now(),                   // time
+                amount,
+                "Cash Deposit"
+        );
+
+        // Save transaction
+        transactionRepository.saveTransaction(transaction);
     }
     public  void withdraw(Account account,double amount){
         if(account.isLocked()){
@@ -71,16 +105,29 @@ public class ATMService {
         }
         account.setBalance(account.getBalance()-amount);
         repository.saveAccounts(accounts);
+        // Create Transaction
+        Transaction transaction = new Transaction(
+                UUID.randomUUID().toString(),          // transactionId
+                account.getAccountNumber(),// accountNumber
+                null,
+                TransactionType.WITHDRAW,               // type
+                LocalDateTime.now(),                   // time
+                amount,
+                "Cash Withdrawn"
+        );
+
+        // Save transaction
+        transactionRepository.saveTransaction(transaction);
     }
     public void transfer(Account sender,String receiverAccountNumber,double amount){
+        if(sender.getAccountNumber().equals(receiverAccountNumber)){
+            throw new RuntimeException("You can't transfer into your account.");
+        }
         if(sender.isLocked()){
             throw new AccountLockedException("Sender account is locked");
         }
         if(amount<=0){
             throw new RuntimeException("Transfer amount must be positive");
-        }
-        if(sender.getBalance()<amount){
-            throw new InsufficientBalanceException("Insufficient balance");
         }
         Account receiver = accounts.get(receiverAccountNumber);
         if(receiver==null){
@@ -89,9 +136,44 @@ public class ATMService {
         if(receiver.isLocked()){
             throw new AccountLockedException("Receiver account is locked.");
         }
+        if(sender.getBalance()<amount){
+            throw new InsufficientBalanceException("Insufficient balance");
+        }
         //performing transfer
         sender.setBalance(sender.getBalance()-amount);
         receiver.setBalance(receiver.getBalance()+amount);
         repository.saveAccounts(accounts);
+
+        // Create Transaction
+        Transaction senderTransaction = new Transaction(
+                UUID.randomUUID().toString(),          // transactionId
+                sender.getAccountNumber(),
+                receiver.getAccountNumber(),// accountNumber
+                TransactionType.TRANSFER_OUT,               // type
+                LocalDateTime.now(),                   // time
+                amount,
+                "tune kisi ko transer kiya hai"
+        );
+
+        Transaction receiverTransaction = new Transaction(
+                UUID.randomUUID().toString(),          // transactionId
+                receiver.getAccountNumber(),
+                sender.getAccountNumber(),// accountNumber
+                TransactionType.TRANSFER_IN,               // type
+                LocalDateTime.now(),                   // time
+                amount,
+                "is bhai ne itna transfer kiya tujhe"
+        );
+
+
+
+        // Save transaction
+        transactionRepository.saveTransaction(senderTransaction);
+        transactionRepository.saveTransaction(receiverTransaction);
     }
+
+    public List<Transaction> getTransactionHistory(String accountNumber) {
+        return transactionRepository.getTransactionsByAccount(accountNumber);
+    }
+
 }

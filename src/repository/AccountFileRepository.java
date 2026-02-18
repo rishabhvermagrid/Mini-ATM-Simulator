@@ -61,15 +61,39 @@ public class AccountFileRepository implements AccountRepository {
         return accounts;
     }
 
+//        User deposits money →
+//        Update balance in memory
+//        Call saveAccounts(accounts)
+//        File is rewritten with updated balances
     @Override
     public void saveAccounts(Map<String, Account> accounts) {
-        System.out.println(accounts);
-        //write operations
 
-        //whenever someone create new account then his account info will get store in the csv
-        //before click on exit we will call save accounts and it will update that row with new values
-            //if someone deposit then it will find that account's row and edit balance field on it
-            //same for withdraw
-            //for transfer, sender and receiver both's balance will get change
+        File file = new File(FILE_PATH);
+
+        try (BufferedWriter bw = new BufferedWriter(new FileWriter(file, false))) {
+
+            // Write header
+            bw.write("accountNumber,accountHolderName,pin,balance,isLocked,failedAttempts");
+            bw.newLine();
+
+            // Write each account
+            for (Account account : accounts.values()) {
+
+                bw.write(
+                        account.getAccountNumber() + "," +
+                                account.getAccountHolderName() + "," +
+                                account.getPin() + "," +
+                                account.getBalance() + "," +
+                                account.isLocked() + "," +
+                                account.getFailedLoginAttempts()
+                );
+
+                bw.newLine();
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
+
 }
