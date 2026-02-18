@@ -33,3 +33,5 @@ bin/
 
 ### Class ###
 *.class
+accounts.csv
+transactions.csv
