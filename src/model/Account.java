@@ -1,16 +1,6 @@
 package model;
-import exception.InsufficientBalanceException;
-
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-
-/*
-Account number must be unique.
-Initial balance must be ≥ 0.
-PIN must be exactly 4 digits.
-Account must be locked after 3 failed login attempts.
- */
 
 public class Account {
     private String accountNumber;
@@ -20,6 +10,7 @@ public class Account {
     private boolean isLocked;
     private int failedLoginAttempts;
 
+    private List<Transaction> transactionHistory;
     @Override
     public String toString() {
         return "Account{" +
@@ -32,7 +23,7 @@ public class Account {
                 '}';
     }
 
-    private List<Transaction> transactionHistory;
+
 
     //constructors
     public Account(String accountNumber, String accountHolderName, String pin, double balance, boolean isLocked, int failedLoginAttempts) {
@@ -77,12 +68,8 @@ public class Account {
         return failedLoginAttempts;
     }
 
-    public List<Transaction> getTransactionHistory() {
-        return transactionHistory;
-    }
 
     //methods
-
     public void lockAccount(){
         this.isLocked = true;
     }
@@ -95,9 +82,7 @@ public class Account {
     public void resetFailedAttempts(){
         this.failedLoginAttempts=0;
     }
-    public void addTransaction(Transaction transaction){
-        this.transactionHistory.add(transaction);
-    }
+
 
     public void setBalance(double v) {
         this.balance = v;

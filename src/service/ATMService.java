@@ -11,6 +11,7 @@ import repository.AccountRepository;
 import repository.TransactionRepository;
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -136,6 +137,7 @@ public class ATMService {
         if(sender.getBalance()<amount){
             throw new InsufficientBalanceException("Insufficient balance");
         }
+
         //performing transfer
         sender.setBalance(sender.getBalance()-amount);
         receiver.setBalance(receiver.getBalance()+amount);
@@ -166,9 +168,18 @@ public class ATMService {
         transactionRepository.saveTransaction(senderTransaction);
         transactionRepository.saveTransaction(receiverTransaction);
     }
-
+    //getTime contains LocalDateTime which has year month date time seconds
+    //.sorted(Comparator.comparing(Transaction::getTime).reverse())
+    //****compareTo
+    //    Negative number  → this < other
+    //    Zero             → this == other
+    //    Positive number  → this > other
     public List<Transaction> getTransactionHistory(String accountNumber) {
-        return transactionRepository.getTransactionsByAccount(accountNumber);
+        return transactionRepository.getTransactionsByAccount(accountNumber).stream()
+                        .sorted((t1,t2)-> t2.getTime().compareTo(t1.getTime()))
+                .limit(5)
+                .toList();
+
     }
 
 }
