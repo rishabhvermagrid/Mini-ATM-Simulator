@@ -20,6 +20,8 @@ public class ATMService {
     private AccountRepository repository;
     private Map<String, Account> accounts;
     private TransactionRepository transactionRepository;
+    private static final double DAILY_WITHDRAWAL_LIMIT = 20000;
+
 
     public ATMService(AccountRepository repository, TransactionRepository transactionRepository) throws IOException {
         this.repository = repository;
@@ -74,50 +76,59 @@ public class ATMService {
         );
     }
     public void deposit(Account account,double amount){
-        if(account.isLocked()){
-            throw new AccountLockedException("Account is Locked");
+        synchronized (account){
+            if(account.isLocked()){
+                throw new AccountLockedException("Account is Locked");
+            }
+            if(amount<=0){
+                throw new RuntimeException("Deposit amount must be positive");
+            }
+            //This updates the same Account object that exists inside your accounts Map.
+            account.setBalance(account.getBalance()+amount);
+            repository.saveAccounts(accounts);
+            // Create Transaction
+            Transaction transaction = new Transaction(
+                    UUID.randomUUID().toString(),          // transactionId
+                    account.getAccountNumber(),
+                    TransactionType.DEPOSIT,               // type
+                    LocalDateTime.now(),                   // time
+                    amount,
+                    "Cash Deposit"
+            );
+            // Save transaction
+            transactionRepository.saveTransaction(transaction);
         }
-        if(amount<=0){
-            throw new RuntimeException("Deposit amount must be positive");
-        }
-        //This updates the same Account object that exists inside your accounts Map.
-        account.setBalance(account.getBalance()+amount);
-        repository.saveAccounts(accounts);
-        // Create Transaction
-        Transaction transaction = new Transaction(
-                UUID.randomUUID().toString(),          // transactionId
-                account.getAccountNumber(),
-                TransactionType.DEPOSIT,               // type
-                LocalDateTime.now(),                   // time
-                amount,
-                "Cash Deposit"
-        );
-        // Save transaction
-        transactionRepository.saveTransaction(transaction);
     }
     public  void withdraw(Account account,double amount){
-        if(account.isLocked()){
-            throw new RuntimeException("Withdraw amount must be positive");
-        }
-        if(account.getBalance()<amount){
-            throw new InsufficientBalanceException("Insufficient Balance");
-        }
-        account.setBalance(account.getBalance()-amount);
-        repository.saveAccounts(accounts);
-        // Create Transaction
-        Transaction transaction = new Transaction(
-                UUID.randomUUID().toString(),          // transactionId
-                account.getAccountNumber(),// accountNumber
-                TransactionType.WITHDRAW,               // type
-                LocalDateTime.now(),                   // time
-                amount,
-                "Cash Withdrawn"
-        );
+        synchronized (account){
+            if(account.isLocked()){
+                throw new RuntimeException("Withdraw amount must be positive");
+            }
+            double todayWithdrawn =  getTodayWithdrawnAmount(account.getAccountNumber());
+            if(todayWithdrawn+amount>DAILY_WITHDRAWAL_LIMIT){
+                throw new RuntimeException("Daily Withdrawal Limit Exceeded");
+            }
+            if(account.getBalance()<amount){
+                throw new InsufficientBalanceException("Insufficient Balance");
+            }
+            account.setBalance(account.getBalance()-amount);
+            repository.saveAccounts(accounts);
+            // Create Transaction
+            Transaction transaction = new Transaction(
+                    UUID.randomUUID().toString(),          // transactionId
+                    account.getAccountNumber(),// accountNumber
+                    TransactionType.WITHDRAW,               // type
+                    LocalDateTime.now(),                   // time
+                    amount,
+                    "Cash Withdrawn"
+            );
 
-        // Save transaction
-        transactionRepository.saveTransaction(transaction);
+            // Save transaction
+            transactionRepository.saveTransaction(transaction);
+        }
     }
     public void transfer(Account sender,String receiverAccountNumber,double amount){
+
         if(sender.getAccountNumber().equals(receiverAccountNumber)){
             throw new RuntimeException("You can't transfer into your account.");
         }
@@ -181,5 +192,11 @@ public class ATMService {
                 .toList();
 
     }
-
+    public double getTodayWithdrawnAmount(String accountNumber){
+        return transactionRepository.getTransactionsByAccount(accountNumber).stream()
+                .filter(t->t.getType()==TransactionType.WITHDRAW)
+                .filter(t->t.getTime().toLocalDate().equals(LocalDateTime.now().toLocalDate()))
+                .mapToDouble(Transaction::getAmount)
+                .sum();
+    }
 }

@@ -1,14 +1,1 @@
-Transaction transaction = new Transaction(
-                LocalDateTime.now(),
-                amount,
-                "Deposit",
-                TransactionType.DEPOSIT
-        );
-        transactionHistory.add(transaction);
-
-transaction history remaining
-_________________________________________
-
-
-
-
+synchronization remaining for transfer
