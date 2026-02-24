@@ -36,7 +36,6 @@ public class Transaction {
     public double getAmount() { return amount; }
     public String getDescription() { return description; }
 
-
     @Override
     public String toString() {
         return "Transaction{" +
@@ -48,7 +47,4 @@ public class Transaction {
                 ", description='" + description + '\'' +
                 '}';
     }
-
-
-
 }

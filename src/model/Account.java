@@ -10,7 +10,7 @@ public class Account {
     private boolean isLocked;
     private int failedLoginAttempts;
 
-    private List<Transaction> transactionHistory;
+//    private List<Transaction> transactionHistory;
     @Override
     public String toString() {
         return "Account{" +
@@ -41,7 +41,7 @@ public class Account {
         this.balance = balance;
         this.isLocked = isLocked;
         this.failedLoginAttempts = failedLoginAttempts;
-        this.transactionHistory = new ArrayList<>();
+//        this.transactionHistory = new ArrayList<>();
     }
     //getters
     public String getPin() {
@@ -68,7 +68,6 @@ public class Account {
         return failedLoginAttempts;
     }
 
-
     //methods
     public void lockAccount(){
         this.isLocked = true;
@@ -88,3 +87,4 @@ public class Account {
         this.balance = v;
     }
 }
+

@@ -1,1 +1,2 @@
 synchronization remaining for transfer
+e.printTrace() : It is used to print detailed error information when an exception occurs.

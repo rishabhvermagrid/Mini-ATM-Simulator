@@ -11,7 +11,6 @@ import repository.AccountRepository;
 import repository.TransactionRepository;
 import java.io.IOException;
 import java.time.LocalDateTime;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -47,6 +46,7 @@ public class ATMService {
 
     //authentication
     public Account login(String accountNumber,String pin) throws IOException {
+
         accounts = repository.loadAccounts();
         //check if account exits
         Account account = accounts.get(accountNumber);
@@ -99,6 +99,7 @@ public class ATMService {
             transactionRepository.saveTransaction(transaction);
         }
     }
+
     public  void withdraw(Account account,double amount){
         synchronized (account){
             if(account.isLocked()){
@@ -122,13 +123,11 @@ public class ATMService {
                     amount,
                     "Cash Withdrawn"
             );
-
             // Save transaction
             transactionRepository.saveTransaction(transaction);
         }
     }
     public void transfer(Account sender,String receiverAccountNumber,double amount){
-
         if(sender.getAccountNumber().equals(receiverAccountNumber)){
             throw new RuntimeException("You can't transfer into your account.");
         }
@@ -179,6 +178,7 @@ public class ATMService {
         transactionRepository.saveTransaction(senderTransaction);
         transactionRepository.saveTransaction(receiverTransaction);
     }
+
     //getTime contains LocalDateTime which has year month date time seconds
     //.sorted(Comparator.comparing(Transaction::getTime).reverse())
     //****compareTo
@@ -190,7 +190,6 @@ public class ATMService {
                         .sorted((t1,t2)-> t2.getTime().compareTo(t1.getTime()))
                 .limit(5)
                 .toList();
-
     }
     public double getTodayWithdrawnAmount(String accountNumber){
         return transactionRepository.getTransactionsByAccount(accountNumber).stream()
